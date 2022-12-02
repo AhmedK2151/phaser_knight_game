@@ -11,12 +11,17 @@ export default class Test extends Phaser.Scene {
     }
 
     preload() {
+        //Terrain
         this.load.image("forrest-tiles", "./assets/oak_woods_v1.0/oak_woods_tileset.png")
         this.load.tilemapTiledJSON("map", "./assets/oak_woods_v1.0/oak.json")
+
+        //Paralax Background
 
         this.load.image("bg_layer1", "assets/oak_woods_v1.0/background/background_layer_1.png")
         this.load.image("bg_layer2", "assets/oak_woods_v1.0/background/background_layer_2.png")
         this.load.image("bg_layer3", "assets/oak_woods_v1.0/background/background_layer_3.png")
+
+        //Player
 
         this.load.spritesheet("knight_run", "./assets/knight_spriteSheets/_Run.png", {
             frameWidth: 120,
@@ -68,7 +73,34 @@ export default class Test extends Phaser.Scene {
             frameHeight: 80,
         })
 
-        this.load.spritesheet("e_knight_idle", "./assets/enemy_knight/noBKG_KnightIdle.png", {
+        //Swordsman
+
+        this.load.spritesheet("e_knight_idle", "./assets/enemy_knight/KnightIdle.png", {
+            frameWidth: 64,
+            frameHeight: 64,
+        })
+
+        this.load.spritesheet("e_knight_run", "./assets/enemy_knight/KnightRun.png", {
+            frameWidth: 96,
+            frameHeight: 64,
+        })
+
+        this.load.spritesheet("e_knight_attack", "./assets/enemy_knight/KnightAttack.png", {
+            frameWidth: 64,
+            frameHeight: 64,
+        })
+
+        this.load.spritesheet("e_knight_death", "./assets/enemy_knight/KnightDeath.png", {
+            frameWidth: 64,
+            frameHeight: 64,
+        })
+
+        this.load.spritesheet("e_knight_jump", "./assets/enemy_knight/KnightJumpAndFall.png", {
+            frameWidth: 64,
+            frameHeight: 64,
+        })
+
+        this.load.spritesheet("e_knight_shield", "./assets/enemy_knight/KnightShield.png", {
             frameWidth: 64,
             frameHeight: 64,
         })
@@ -87,10 +119,10 @@ export default class Test extends Phaser.Scene {
         const width = this.scale.width
         const height = this.scale.height
 
-        const map = this.make.tilemap({key: "map"})
-        this.tiles = map.addTilesetImage("oak_woods_tileset","forrest-tiles")
-        this.groundLayer = map.createLayer("Tile Layer 1", this.tiles, 0,-100)
-        this.groundLayer.setCollisionByExclusion(-1, true)
+        const map1 = this.make.tilemap({key: "map"})
+        this.tiles = map1.addTilesetImage("oak_woods_tileset","forrest-tiles")
+        this.groundLayer = map1.createLayer("Tile Layer 1", this.tiles, 0,-100)
+        this.groundLayer.setCollisionByProperty({collides: true})
         this.groundLayer.setScale(2)
 
         var bg_scale = 4
@@ -110,14 +142,25 @@ export default class Test extends Phaser.Scene {
             .setScrollFactor(0.8)
         }
 
-        const spawnPoint = map.findObject(
-            "spawn_points",
-            obj => obj.name === "enemy_spawn"
-        );
+        //gets enemy spawn locations
 
-        this.enemy1 = new Swordsman(this, spawnPoint.x, spawnPoint.y - 100, "e_knight_idle", "0")
-        this.enemy1
-            .setScale(2)
+        this.enemySpawns = []
+        this.spawnPoint = map1.findObject("spawn_points", (obj) => {
+            if(obj.name === "enemy_spawn") {
+                this.enemySpawns.push(obj)
+            }
+        } )
+
+        //creates new Swordsmen based on how many spawn locations are available
+        //adds them to a physics group in this scene
+
+        this.enemyGroup = this.add.group()
+        for(let i = 0; i < this.enemySpawns.length; i ++) {
+            let swordsman = new Swordsman(this, (this.enemySpawns[i].x * 2), this.enemySpawns[i].y -400, "e_knight_idle", "0", `swordsman_${i}`).setScale(2)
+            swordsman.name = "swordsman_" + i
+            this.enemyGroup.add(swordsman)
+        }
+
 
         this.cameras.main
             .startFollow(this.player)
@@ -131,22 +174,27 @@ export default class Test extends Phaser.Scene {
         this.physics.add.existing(this.rectangle)
         this.rectangle.body.setDragX(400)
 
-        this.physics.add.collider([this.player, this.rectangle, this.enemy1], [this.groundLayer])
-        this.physics.add.collider(this.player, this.rectangle)
+        this.physics.add.collider([this.player, this.pgroup, this.rectangle, this.enemyGroup], [this.groundLayer])
+        this.physics.add.collider(this.player, [this.rectangle, this.enemyGroup])
 
         this.isAttacking;
+        console.log("enemygroup"+ this.enemyGroup)
     }
 
     update() {
-        console.log("width"+this.groundLayer.width)
         this.player.update()
-        this.enemy1.update()
-        if(this.physics.overlap(this.player, [this.rectangle, this.enemy1]) && this.isAttacking === true) {
-            console.log(this.enemy1.health)
-            console.log("Hit")
-            this.enemy1.health -= this.player.pDmg
-            console.log(this.enemy1.health)
-        } 
+
+        //Iterates over each Swordsman in the group, starting their update functions
+        this.enemyGroup.children.entries.forEach(
+            (sprite) => {
+                sprite.update();
+                //console.log(sprite)
+            }
+        );
+
+        if(this.physics.overlap(this.enemyGroup, this.player) && this.isAttacking) {
+            console.log("hit")
+        }
 
         if(this.rectangle.y > 1300) {
             this.rectangle.setPosition(200,400)

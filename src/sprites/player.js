@@ -10,6 +10,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.scene.add.existing(this);
 
         this.playerHealth = 100;
+        this.pDmg = 10
 
   
         this.cursors = scene.input.keyboard.addKeys(
@@ -83,7 +84,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     update() {
         const cursors = this.cursors
-        const playerSpeed = 200
+        const playerSpeed = 400
 
         const touchingGround = this.scene.player.body.blocked.down
 
@@ -112,6 +113,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
             this.scene.player.anims.play("jump_fall", true)
         }
 
+        if(cursors.right.isDown && cursors.right.getDuration() < 300 && !touchingGround) {
+            this.scene.player.setVelocityX(playerSpeed / 2)
+
+        } else if(cursors.left.isDown && cursors.left.getDuration() < 300 && !touchingGround) {
+            this.scene.player.setVelocityX(-playerSpeed / 2)
+
+        }
+
         if(cursors.shift._justDown && !isAttacking && touchingGround) {
             if (cursors.down.isDown) {
                 this.scene.player.anims.play("crouch_attack", true)
@@ -131,16 +140,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
                 this.scene.player.chain(["idle"])
             }
             
-
+                                        //At least 100ms since last W button keypress
         } else if(cursors.up.isDown && cursors.up.getDuration() < 100 && touchingGround) {
             this.scene.player.setVelocity(this.scene.player.body.velocity.x, -(playerSpeed * 1.5))
             this.scene.player.setAcceleration(this.scene.player.body.acceleration.x, (playerSpeed * 3))
 
             this.scene.player.anims.play("jumpUp", true)
 
-
-            
-        } else if (cursors.down.isDown && !isAttacking) {
+        } else if (cursors.down.isDown && !isAttacking && !isJumping) {
             if(cursors.right.isDown) {
                 this.scene.player.setVelocityX(0)
                 this.scene.player.resetFlip()
@@ -152,7 +159,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
                             this.scene.player.anims.play("crouchWalk", true)
                         }
                 }
-            } else if(cursors.left.isDown ) {
+            } else if(cursors.left.isDown && !isJumping) {
                 this.scene.player.setVelocityX(0)
                 this.scene.player.setFlipX(true)
                 if(cursors.left.getDuration() > 200) {
@@ -169,7 +176,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
             }
         
 
-        } else if (cursors.right.isDown && touchingGround && !isAttacking) {
+        } else if (cursors.right.isDown && touchingGround && !isAttacking && !isJumping) {
             this.scene.player.setVelocityX(0);
             this.scene.player.resetFlip()
             if(cursors.right.getDuration() > 160) {
@@ -182,7 +189,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
                 }
             }
 
-        } else if (cursors.left.isDown && touchingGround && !isAttacking) {
+        } else if (cursors.left.isDown && touchingGround && !isAttacking && !isJumping) {
             this.scene.player.setVelocityX(0);
             this.scene.player.setFlipX(true)
             if(cursors.left.getDuration() > 160) {

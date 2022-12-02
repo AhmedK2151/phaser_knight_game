@@ -1,4 +1,4 @@
 # Set-Up
 
-npm i
-npx vite
+- npm i
+- npx vite
