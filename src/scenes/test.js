@@ -174,8 +174,9 @@ export default class Test extends Phaser.Scene {
         this.physics.add.existing(this.rectangle)
         this.rectangle.body.setDragX(400)
 
-        this.physics.add.collider([this.player, this.pgroup, this.rectangle, this.enemyGroup], [this.groundLayer])
+        this.physics.add.collider([this.player, this.rectangle, this.enemyGroup], [this.groundLayer])
         this.physics.add.collider(this.player, [this.rectangle, this.enemyGroup])
+        this.physics.add.collider(this.enemyGroup)
 
         this.isAttacking;
         console.log("enemygroup"+ this.enemyGroup)
@@ -192,9 +193,16 @@ export default class Test extends Phaser.Scene {
             }
         );
 
+        if(this.physics.collide(this.enemyGroup), (enemyObj) => {
+            enemyObj.body.x += Math.floor(Math.random() * 30)
+        }) {
+            
+        }
+
         if(this.physics.overlap(this.enemyGroup, this.player) && this.isAttacking) {
             console.log("hit")
         }
+
 
         if(this.rectangle.y > 1300) {
             this.rectangle.setPosition(200,400)

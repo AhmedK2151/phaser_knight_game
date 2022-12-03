@@ -11,6 +11,8 @@ export default class Swordsman extends Phaser.Physics.Arcade.Sprite {
         this.attackDmg = 5
         this.speed = 140
         this.isHit = false
+        this.body.setBounceX(0.1)
+        this.setBodySize(30, 64)
 
         const anims = scene.anims
 
@@ -58,6 +60,7 @@ export default class Swordsman extends Phaser.Physics.Arcade.Sprite {
         let playerVisible = false;
 
 
+
         //Informs the enemy which side the player is relative to itself
 
         if((this.x - this.scene.player.x > -450 && this.x - this.scene.player.x < -100)) {
@@ -96,7 +99,9 @@ export default class Swordsman extends Phaser.Physics.Arcade.Sprite {
             }
         }
 
+
         console.log(isPlayerLeft, isPlayerRight, "Player visible:" + playerVisible)
+
 
     }
 }

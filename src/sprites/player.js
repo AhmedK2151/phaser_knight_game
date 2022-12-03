@@ -11,6 +11,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
         this.playerHealth = 100;
         this.pDmg = 10
+        this.setSize(38, 80)
 
   
         this.cursors = scene.input.keyboard.addKeys(
@@ -96,11 +97,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         if(animName.includes("attack")) {
             this.scene.isAttacking = true
             console.log("is attacking")
-            this.scene.player.setSize(90, 80)
         
         } else {
             this.scene.isAttacking = false
-            this.scene.player.setSize(40, 80)
         }
 
         if(this.scene.player.anims.getName() == "jumpUp") {
@@ -123,20 +122,20 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
         if(cursors.shift._justDown && !isAttacking && touchingGround) {
             if (cursors.down.isDown) {
-                this.scene.player.anims.play("crouch_attack", true)
+                this.scene.player.anims.play("crouch_attack", true).on("animationcomplete", () => {this.scene.isAttacking = false})
                 this.scene.player.chain(["idle"])
             } else {
-                this.scene.player.anims.play("attack_light", true)
+                this.scene.player.anims.play("attack_light", true).on("animationcomplete", () => {this.scene.isAttacking = false})
                 this.scene.player.chain(["idle"])
             }
         } else
         
         if(cursors.spaceBar._justDown && !isAttacking) {
             if (cursors.down.isDown) {
-                this.scene.player.anims.play("crouch_attack", true)
+                this.scene.player.anims.play("crouch_attack", true).on("animationcomplete", () => {this.scene.isAttacking = false})
                 this.scene.player.chain(["idle"])
             } else {
-                this.scene.player.anims.play("attack_heavy", true)
+                this.scene.player.anims.play("attack_heavy", true).on("animationcomplete", () => {this.scene.isAttacking = false})
                 this.scene.player.chain(["idle"])
             }
             
